@@ -5,7 +5,7 @@ import heapq
 
 def hmap_to_png(world):
     pnglist = []
-    hmap = world.get_hmap()
+    hmap = world.get_height_map()
     for row in hmap:
         pngrow = []
         for hval in row:
@@ -13,11 +13,22 @@ def hmap_to_png(world):
             pngrow.append(colour)
         pnglist.append(pngrow)
     image = png.from_array(pnglist, "L")
-    image.save(f"{world.get_name()}_hmap.png")
+    image.save(f"{world.name}_hmap.png")
+
+def bmap_to_png(world):
+    pnglist = []
+    for row in world._biome_map:
+        pngrow = []
+        for biome in row:
+            colour = BIOME_COLOURS[biome]
+            pngrow += list(colour)
+        pnglist.append(pngrow)
+    image = png.from_array(pnglist, "RGB")
+    image.save(f"{world.name}_bmap.png")
 
 def tmap_to_png(world, path):
     pnglist = []
-    tmap = world.get_tmap()
+    tmap = world.get_terrain_map()
     for y, row in enumerate(tmap):
         pngrow = []
         for x, tval in enumerate(row):
@@ -29,11 +40,11 @@ def tmap_to_png(world, path):
         pnglist.append(pngrow)
     
     image = png.from_array(pnglist, "RGB")
-    image.save(f"{world.get_name()}_tmap.png")
+    image.save(f"{world.name}_tmap.png")
 
 def world_stats(world):
     print("World Analysis:")
-    hmap = world.get_hmap()
+    hmap = world.get_height_map()
     lowest = 1
     highest = 0
     for row in hmap:

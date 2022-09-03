@@ -1,2 +1,4 @@
+# Remove images
+*.png
 
 *.pyc
