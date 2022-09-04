@@ -14,7 +14,7 @@ class World():
         self._height_map = [[0 for _ in range(width)] for _ in range(height)]
         self._precipitation_map = [
             [0 for _ in range(width)] for _ in range(height)]
-        self._PET_map = [[0 for _ in range(width)] for _ in range(height)]
+        self._temperature_map = [[0 for _ in range(width)] for _ in range(height)]
         self._biome_map = [["" for _ in range(width)] for _ in range(height)]
         self._terrain_map = [["" for _ in range(width)] for _ in range(height)]
 
@@ -89,25 +89,25 @@ class World():
         if seed is None:
             seed = r.randint(1, 1000)
         tic = t.perf_counter()
-        _generate_simplex_map(map=self._precipitation_map, seed=seed, filter=lambda z : 4500*max(min((z + 1)/2, 1), 0))
+        _generate_simplex_map(map=self._precipitation_map, seed=seed, filter=lambda z : 2**(6+7*max(min((z + 1)/2, 1), 0)))
         toc = t.perf_counter()
         if verbose:
             print(f"Done! ({toc - tic:0.4f} seconds)")
 
-    def _generate_PET_map(self, *, seed=None, verbose=True):
+    def _generate_temperature_map(self, *, seed=None, verbose=True):
         """
-        Generates the world's annual precipitation map.
+        Generates the world's average temperature map.
         Parameters:
             seed(int | None): The seed for the pseudo-randomness.
                               If none, random.randint(1,1000) is used
             verbose(boolean): whether to print runtime and progress
         """
         if verbose:
-            print("Generating PET Map...")
+            print("Generating Temperature Map...")
         if seed is None:
             seed = r.randint(1, 1000)
         tic = t.perf_counter()
-        _generate_simplex_map(map=self._PET_map, seed=seed, filter=lambda z : 5*max(min((z + 1)/2, 1), 0))
+        _generate_simplex_map(map=self._temperature_map, seed=seed, filter=lambda z : 24*max(min((z + 1)/2, 1), 0))
         toc = t.perf_counter()
         if verbose:
             print(f"Done! ({toc - tic:0.4f} seconds)")
@@ -124,7 +124,7 @@ class World():
         for y, row in enumerate(self._height_map):
             for x in range(len(row)):
                 precipitation = holdridge_lifezone_system.HoldridgeParameter("Annual Precipitation", self._precipitation_map[y][x])
-                PET = holdridge_lifezone_system.HoldridgeParameter("PET", self._PET_map[y][x])
+                PET = holdridge_lifezone_system.HoldridgeParameter("Biotemperature", self._temperature_map[y][x])
                 self._biome_map[y][x] = holdridge_lifezone_system.get_holdridge_biome([precipitation, PET])
         toc = t.perf_counter()
         if verbose:
@@ -256,7 +256,7 @@ class World():
         """
         self._generate_height_map(verbose=verbose)
         self._generate_precipitation_map(verbose=verbose)
-        self._generate_PET_map(verbose=verbose)
+        self._generate_temperature_map(verbose=verbose)
         self._generate_biome_map(verbose=verbose)
         self._generate_terrain_map(verbose=verbose)
         self._generate_rivers(rivers, river_distance, verbose=verbose)
