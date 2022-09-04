@@ -89,7 +89,7 @@ class World():
         if seed is None:
             seed = r.randint(1, 1000)
         tic = t.perf_counter()
-        _generate_simplex_map(map=self._precipitation_map, seed=seed, filter=lambda z : 8000*max(min((z + 1)/2, 1), 0))
+        _generate_simplex_map(map=self._precipitation_map, seed=seed, filter=lambda z : 4500*max(min((z + 1)/2, 1), 0))
         toc = t.perf_counter()
         if verbose:
             print(f"Done! ({toc - tic:0.4f} seconds)")
@@ -107,7 +107,7 @@ class World():
         if seed is None:
             seed = r.randint(1, 1000)
         tic = t.perf_counter()
-        _generate_simplex_map(map=self._PET_map, seed=seed, filter=lambda z : 10*max(min((z + 1)/2, 1), 0))
+        _generate_simplex_map(map=self._PET_map, seed=seed, filter=lambda z : 5*max(min((z + 1)/2, 1), 0))
         toc = t.perf_counter()
         if verbose:
             print(f"Done! ({toc - tic:0.4f} seconds)")
@@ -270,8 +270,9 @@ def _generate_simplex_map(map, *, seed=None, filter=lambda z : max(min((z + 1)/2
     """
     Generates a 0 to 1 simplex noise map.
     Parameters:
-        seed(int | None): The seed for the pseudo-randomness.
-                            If none, random.randint(1,1000) is used
+        map(list[list]): the map to write over
+        seed(int | None): The seed for the pseudo-randomness. If none, random.randint(1,1000) is used
+        filter(Callable[[float], Any]): A filter to apply on the output of each cell
     """
     if seed is None:
         seed = r.randint(1, 1000)

@@ -74,22 +74,22 @@ class HoldridgeParameter():
         if parameter_name == "Humidity":
             self.line_value = _HUMIDITY_PROVINCES[value]
         elif parameter_name == "Annual Precipitation":
-            self.line_value = math.log2(value) - math.log2(62.5)
+            self.line_value = math.log2(value) - math.log2(62.5) if value > 0 else 0
         elif parameter_name == "PET":
-            self.line_value = math.log2(value) - math.log2(0.125)
+            self.line_value = math.log2(value) - math.log2(0.125) if value > 0 else 0
         elif parameter_name == "Latitudinal Region":
             self.line_value = _LATITUDINAL_REGIONS[value]
         elif parameter_name == "Altitudinal Belt":
             self.line_value = _ALTITUDINAL_BELTS[value]
         elif parameter_name == "Biotemperature":
-            self.line_value = math.log2(value) - math.log2(0.1875)
+            self.line_value = math.log2(value) - math.log2(0.1875) if value > 0 else 0
         else:
             raise ValueError("Invalid parameter_name for Holdridge parameter")
 
 
 def _get_holdridge_coordinates(parameter1, parameter2):
     """
-    Get the coordinates of the respective biome in _HOLDRIDGE_LIFEZONE_TRIANGLE given two lines.
+    Get the coordinates (x,y) of the respective biome in _HOLDRIDGE_LIFEZONE_TRIANGLE given two lines.
     """
     if parameter1.line_type == parameter2.line_type:
         raise ValueError(
@@ -97,11 +97,11 @@ def _get_holdridge_coordinates(parameter1, parameter2):
 
     if parameter1.line_type == "Row":
         if parameter2.line_type == "Column":
-            return (parameter1.line_value, parameter2.line_value)
+            return (parameter2.line_value, parameter1.line_value)
         elif parameter2.line_type == "Diagonal":
-            return (parameter1.line_value, parameter1.line_value + parameter2.line_value)
+            return (parameter1.line_value + parameter2.line_value, parameter1.line_value)
         elif parameter2.line_type == "Antidiagonal":
-            return (parameter1.line_value, parameter2.line_value - parameter1.line_value)
+            return (parameter2.line_value - parameter1.line_value, parameter1.line_value)
         else:
             raise ValueError("Unknown Holdridge parameter line_type")
     elif parameter1.line_type == "Column":
@@ -121,24 +121,24 @@ def _get_holdridge_coordinates(parameter1, parameter2):
     raise ValueError("Unknown Holdridge parameter line_type")
 
 
-def _move_coordinate_within_triangle(row, column):
+def _move_coordinate_within_triangle(x, y):
     """
-    Find the closest coordinate that is within the Holdridge triangle and convert any floats into ints
+    Find the closest coordinate that is within the Holdridge triangle
     """
-    row = max(row, 0)
-    column = max(column, 0)
-    if row + column >= len(_HOLDRIDGE_LIFEZONE_TRIANGLE):
-        if -len(_HOLDRIDGE_LIFEZONE_TRIANGLE) <= row - column <= len(_HOLDRIDGE_LIFEZONE_TRIANGLE):
+    x = max(x, 0)
+    y = max(y, 0)
+    if x + y >= len(_HOLDRIDGE_LIFEZONE_TRIANGLE):
+        if -len(_HOLDRIDGE_LIFEZONE_TRIANGLE) <= x - y <= len(_HOLDRIDGE_LIFEZONE_TRIANGLE):
             # Move along diagonal
-            row = (row - column + len(_HOLDRIDGE_LIFEZONE_TRIANGLE)-1)/2
-            column = (column - row + len(_HOLDRIDGE_LIFEZONE_TRIANGLE)-1)/2
-        elif row > column:
-            row = len(_HOLDRIDGE_LIFEZONE_TRIANGLE)-1
-            column = 0
+            x = (x - y + len(_HOLDRIDGE_LIFEZONE_TRIANGLE)-1)/2
+            y = (y - x + len(_HOLDRIDGE_LIFEZONE_TRIANGLE)-1)/2
+        elif x > y:
+            x = len(_HOLDRIDGE_LIFEZONE_TRIANGLE)-1
+            y = 0
         else:
-            row = 0
-            column = len(_HOLDRIDGE_LIFEZONE_TRIANGLE)-1
-    return (math.floor(row), math.floor(column))
+            x = 0
+            y = len(_HOLDRIDGE_LIFEZONE_TRIANGLE)-1
+    return (x, y)
 
 
 def get_holdridge_biome(parameters):
@@ -163,9 +163,9 @@ def get_holdridge_biome(parameters):
     if triangle_coordinates == []:
         raise ValueError(
             "Parameters specified were unable to define any coordinates")
-    row_total, column_total = 0, 0
+    x_total, y_total = 0, 0
     for coordinate in triangle_coordinates:
-        row_total += coordinate[0]
-        column_total += coordinate[1]
-    average_row, average_col = _move_coordinate_within_triangle(row_total/len(triangle_coordinates), column_total/len(triangle_coordinates))
-    return _HOLDRIDGE_LIFEZONE_TRIANGLE[average_col][average_row]
+        x_total += coordinate[0]
+        y_total += coordinate[1]
+    average_x, average_y = _move_coordinate_within_triangle(x_total/len(triangle_coordinates), y_total/len(triangle_coordinates))
+    return _HOLDRIDGE_LIFEZONE_TRIANGLE[math.floor(average_y)][math.floor(average_x)]
