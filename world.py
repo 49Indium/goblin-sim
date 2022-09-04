@@ -11,12 +11,12 @@ class World():
         self.name = name
         self._width = width
         self._height = height
-        self._height_map = [[0 for i in range(width)] for i in range(height)]
+        self._height_map = [[0 for _ in range(width)] for _ in range(height)]
         self._precipitation_map = [
-            [0 for i in range(width)] for i in range(height)]
-        self._PET_map = [[0 for i in range(width)] for i in range(height)]
-        self._biome_map = [["" for i in range(width)] for i in range(height)]
-        self._terrain_map = [["" for i in range(width)] for i in range(height)]
+            [0 for _ in range(width)] for _ in range(height)]
+        self._PET_map = [[0 for _ in range(width)] for _ in range(height)]
+        self._biome_map = [["" for _ in range(width)] for _ in range(height)]
+        self._terrain_map = [["" for _ in range(width)] for _ in range(height)]
 
     def get_adjacents(self, qpos):
         qx, qy = qpos
